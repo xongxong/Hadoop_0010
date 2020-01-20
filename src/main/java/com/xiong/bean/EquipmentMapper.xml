@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xiong.bean.EquipmentDao">
+    <select id="selectByEquId" resultMap="com.xiong.bean.Equipment" parameterType="java.lang.Integer">
+        select *
+        from equipment
+        where id = #{id,jdbcType=VARCHAR}
+    </select>
+    <select id="selectAllEqu" resultMap="com.xiong.bean.Equipment" >
+        select *
+        from equipment
+    </select>
+</mapper>
