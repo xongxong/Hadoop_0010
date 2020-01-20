@@ -1760,41 +1760,6 @@ public class Test {
     }
 }
 
-
-class Foo {
-
-
-    //AtomicInteger atomicInteger = new AtomicInteger(0);
-    int count = 0;
-
-    public Foo() {
-
-    }
-
-    public void first(Runnable printFirst) throws InterruptedException {
-        // printFirst.run() outputs "first". Do not change or remove this line.
-        while (count != 0) ;
-        count++;
-        printFirst.run();
-    }
-
-    public void second(Runnable printSecond) throws InterruptedException {
-
-        // printSecond.run() outputs "second". Do not change or remove this line.
-        while (count != 1) ;
-        count++;
-        Thread.sleep(1);
-        printSecond.run();
-    }
-
-    public void third(Runnable printThird) throws InterruptedException {
-        // printThird.run() outputs "third". Do not change or remove this line.
-        while (count != 2) ;
-        printThird.run();
-    }
-}
-
-
 class JvmThread {
     public static void main(String[] args) {
         new Thread(() -> {
