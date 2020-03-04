@@ -21,6 +21,8 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.sl.draw.BitmapImageRenderer;
+import org.apache.poi.sl.draw.Drawable;
 import org.apache.poi.util.IntegerField;
 import org.apache.poi.util.SystemOutLogger;
 import redis.clients.jedis.Jedis;
@@ -37,6 +39,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 public class Test {
     private boolean flag = false;
@@ -1069,15 +1072,6 @@ public class Test {
     }
 
 
-    public int maxProfit(int[] prices) {
-        int res = 0;
-        for (int i = 1; i < prices.length; i++) {
-            if (prices[i] > prices[i - 1])
-                res += prices[i] - prices[i - 1];
-        }
-        return res;
-    }
-
     //单调栈
     public static boolean find132pattern(int[] nums) {
         int min = Integer.MIN_VALUE;
@@ -1699,65 +1693,109 @@ public class Test {
             System.out.println("res:" + f.get().toString());
     }
 
-
-    public void union(Map<Integer, Integer> map, int key) {
-        if (!map.containsKey(key))
-            return;
-        map.put(key, find(map, key));
-    }
-
-    public int find(Map<Integer, Integer> map, int key) {
-        if (!map.containsKey(key))
-            return key;
-        return find(map, map.get(key));
-    }
-
-    public int regionsBySlashes(String[] grid) {
-        int N = grid.length;
-        Map<Integer, Integer> map = new HashMap<>();
-        for (int i = 0; i < N; i++) {
-            char[] ch = grid[i].toCharArray();
-            for (int j = 0; j < ch.length; j++)
-                if (ch[j] == '/')
-                    map.put(i * (N + 1) + j + 1, (i + 1) * (N + 1) + j);
-                else if (ch[j] == '\\')
-                    map.put(i * (N + 1) + j, (i + 1) * (N + 1) + j + 1);
-        }
-        return 0;
-    }
-
-    public int minTaps(int n, int[] ranges) {
-        Queue<int[]> queue = new PriorityQueue<>(new Comparator<int[]>() {
-            @Override
-            public int compare(int[] o1, int[] o2) {
-                if (o1[0] == o2[0])
-                    return o1[1] - o2[1];
-                return o1[0] - o2[0];
+    public int[] constructArr(int[] a) {
+        int len = a.length;
+        int[] left = new int[len], right = new int[len], res = new int[len];
+        for (int i = 0; i < len; i++)
+            if (i == 0) {
+                left[i] = a[i];
+                right[len - 1 - i] = a[len - 1 - i];
+            } else {
+                left[i] = left[i - 1] * a[i];
+                right[len - 1 - i] = right[len - i] * a[len - 1 - i];
             }
-        });
-        for (int i = 0; i < ranges.length; i++)
-            queue.add(new int[]{Math.max(0, i - ranges[i]), i + ranges[i]});
-        int start = 0, end = 0, res = 0;
-        while (!queue.isEmpty()) {
-            int[] tmp = queue.poll();
-            if (tmp[0] == start)
-                end = tmp[1];
-            // else if(tmp[1])
-        }
+        for (int i = 0; i < len; i++)
+            if (i == 0)
+                res[i] = right[i + 1];
+            else if (i == len - 1)
+                res[i] = left[i - 1];
+            else
+                res[i] = right[i + 1] * left[i - 1];
         return res;
     }
 
-    public static void main(String[] args) throws Exception {
-        Set<Set<Integer>> set = new HashSet<>();
-        Set<Integer> set1 = new HashSet<>();
-        set1.add(1);
-        set1.add(2);
-        Set<Integer> set2 = new HashSet<>();
-        set2.add(2);
-        set.add(set1);
-        set.add(set2);
-        System.out.println(set.size());
+    public int countDigitOne(int n) {
+        int count = 0;
+        long i = 1;        // 从个位开始遍历到最高位
+        while (n / i != 0) {
+            long high = n / (10 * i);  // 高位
+            long cur = (n / i) % 10;   // 当前位
+            long low = n - (n / i) * i;
+            if (cur == 0) {
+                count += high * i;
+            } else if (cur == 1) {
+                count += high * i + (low + 1);
+            } else {
+                count += (high + 1) * i;
+            }
+            i = i * 10;
+        }
+        return count;
     }
+
+    public int translateNum(int num) {
+        String s = String.valueOf(num);
+        int len = s.length();
+        int[] dp = new int[len + 1];
+        for (int i = 0; i <= len; i++)
+            if (i < 2)
+                dp[i] = 1;
+            else {
+                int n = Integer.valueOf(s.substring(i - 2, i));
+                dp[i] = dp[i - 1] + (n <= 25 && n >= 10 ? dp[i - 2] : 0);
+            }
+        return dp[len];
+    }
+
+    public int majorityElement(int[] nums) {
+        int key = nums[0];
+        int count = 0;
+        for (int i = 1; i < nums.length; i++) {
+            if (nums[i] != key) count--;
+            else count++;
+            if (count < 0) {
+                key = nums[i];
+                count = 0;
+            }
+        }
+        count = 0;
+        for (int num : nums)
+            if (num == key)
+                count++;
+        return count > nums.length / 2 ? key : -1;
+    }
+
+    class Node {
+        int val;
+        Node next;
+        Node random;
+
+        public Node(int val) {
+            this.val = val;
+            this.next = null;
+            this.random = null;
+        }
+    }
+
+    public Node copyRandomList(Node head) {
+        if (head == null)
+            return null;
+        Map<Node, Node> map = new HashMap<>();
+        Node cur = head;
+        while (cur != null)
+            map.put(cur, new Node((cur.val)));
+        cur = head;
+        while (cur != null) {
+            map.get(cur).next = map.get(cur);
+            map.get(cur).random = map.get(cur.random);
+        }
+        return map.get(head);
+    }
+
+    public static void main(String[] args) {
+
+    }
+
 }
 
 class JvmThread {
